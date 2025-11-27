@@ -1,5 +1,4 @@
-<script>
- gsap.registerPlugin(Draggable, InertiaPlugin, Observer, ScrollTrigger);
+gsap.registerPlugin(Draggable, InertiaPlugin, Observer, ScrollTrigger);
  
 function init3dImageCarousel() {
   let radius;
@@ -183,4 +182,3 @@ function init3dImageCarousel() {
 document.addEventListener("DOMContentLoaded", () =>{
   init3dImageCarousel();
 });
-</script>
