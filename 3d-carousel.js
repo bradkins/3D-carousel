@@ -1,4 +1,3 @@
-<script>
 gsap.registerPlugin(Draggable, InertiaPlugin, Observer, ScrollTrigger);
  
 function init3dImageCarousel() {
@@ -183,4 +182,3 @@ function init3dImageCarousel() {
 document.addEventListener("DOMContentLoaded", () =>{
   init3dImageCarousel();
 });
-</script>
