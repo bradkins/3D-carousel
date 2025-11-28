@@ -14,7 +14,7 @@ function init3dImageCarousel() {
 
   // Define the radius of your cylinder here
   const calcRadius = () => {
-    radius = window.innerWidth * 0.6;
+    radius = window.innerWidth * 0.7;
   }
 
   // Destroy function to reset everything on resize
@@ -74,7 +74,7 @@ function init3dImageCarousel() {
           let blurAmount = 0;
           if (normalizedRotation > 45 && normalizedRotation < 315) {
             const distanceFrom180 = Math.abs(180 - normalizedRotation);
-            blurAmount = (1 - (distanceFrom180 / 135)) * 15;
+            blurAmount = (1 - (distanceFrom180 / 135)) * 30;
           }
           
           const img = panel.querySelector('.img-carousel__img');
@@ -91,13 +91,7 @@ function init3dImageCarousel() {
       inertia: true,
       allowNativeTouchScrolling: true,
       onPress() {
-        // Subtle feedback on touch/mousedown of the wrap
-        gsap.to(content, {
-          clipPath: 'inset(0%)',
-          duration: 0.3,
-          ease: 'power4.out',
-          overwrite: 'auto'
-        });
+       
         // Stop automatic spinning to prepare for drag
         gsap.killTweensOf(spin);
         spin.timeScale(0);
@@ -115,12 +109,7 @@ function init3dImageCarousel() {
         if (!this.tween || !this.tween.isActive()) {
           gsap.to(spin, { timeScale: 1, duration: 0.1 });
         }
-        gsap.to(content, {
-          clipPath: 'inset(0%)',
-          duration: 0.5,
-          ease: 'power4.out',
-          overwrite: 'auto'
-        });
+        
       },
       onThrowComplete() {
         gsap.to(spin, { timeScale: 1, duration: 0.1 });
