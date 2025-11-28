@@ -56,31 +56,33 @@ function init3dImageCarousel() {
     // cheeky workaround to create some 'buffer' when scrolling back up
     spin.progress(1000);
 
-    // Add blur effect based on rotation - ONLY AT THE BACK
+    // Add blur effect with throttling for better performance
+    let lastBlurUpdate = 0;
+    const blurUpdateInterval = 50; // Update blur every 50ms instead of every frame
+
     gsap.ticker.add(() => {
-      panels.forEach((panel, i) => {
-        // Get current rotation of this panel
-        const rotation = gsap.getProperty(panel, 'rotationY');
+      const now = Date.now();
+      
+      // Only update blur every 50ms instead of every frame
+      if (now - lastBlurUpdate > blurUpdateInterval) {
+        lastBlurUpdate = now;
         
-        // Normalize rotation to 0-360
-        const normalizedRotation = ((rotation % 360) + 360) % 360;
-        
-        // Calculate blur: only blur when facing away (90° to 270°)
-        // Maximum blur at 180° (directly back)
-        let blurAmount = 0;
-        if (normalizedRotation > 45 && normalizedRotation < 315) {
-          // Calculate distance from 180° (the back)
-          const distanceFrom180 = Math.abs(180 - normalizedRotation);
-          // Blur increases as we approach 180°, decreases as we move away
-          blurAmount = (1 - (distanceFrom180 / 135)) * 30; // Adjust the * 15 for more/less blur
-        }
-        
-        // Apply blur to the content/image
-        const img = panel.querySelector('.img-carousel__img');
-        if (img) {
-          img.style.filter = `blur(${blurAmount}px)`;
-        }
-      });
+        panels.forEach((panel, i) => {
+          const rotation = gsap.getProperty(panel, 'rotationY');
+          const normalizedRotation = ((rotation % 360) + 360) % 360;
+          
+          let blurAmount = 0;
+          if (normalizedRotation > 45 && normalizedRotation < 315) {
+            const distanceFrom180 = Math.abs(180 - normalizedRotation);
+            blurAmount = (1 - (distanceFrom180 / 135)) * 15;
+          }
+          
+          const img = panel.querySelector('.img-carousel__img');
+          if (img) {
+            img.style.filter = `blur(${blurAmount}px)`;
+          }
+        });
+      }
     });
 
     draggableInstance = Draggable.create(proxy, {
@@ -89,7 +91,13 @@ function init3dImageCarousel() {
       inertia: true,
       allowNativeTouchScrolling: true,
       onPress() {
-        
+        // Subtle feedback on touch/mousedown of the wrap
+        gsap.to(content, {
+          clipPath: 'inset(0%)',
+          duration: 0.3,
+          ease: 'power4.out',
+          overwrite: 'auto'
+        });
         // Stop automatic spinning to prepare for drag
         gsap.killTweensOf(spin);
         spin.timeScale(0);
@@ -107,6 +115,12 @@ function init3dImageCarousel() {
         if (!this.tween || !this.tween.isActive()) {
           gsap.to(spin, { timeScale: 1, duration: 0.1 });
         }
+        gsap.to(content, {
+          clipPath: 'inset(0%)',
+          duration: 0.5,
+          ease: 'power4.out',
+          overwrite: 'auto'
+        });
       },
       onThrowComplete() {
         gsap.to(spin, { timeScale: 1, duration: 0.1 });
