@@ -123,7 +123,7 @@ function init3dImageCarousel() {
       }
     });
     intro
-      .fromTo(spin, { timeScale: 5 }, { timeScale: 1, duration: 2 })
+      .fromTo(spin, { timeScale: 18 }, { timeScale: 1, duration: 2 })
       .fromTo(wrap, { scale: 0.5, rotation: 2 }, { scale: 1, rotation: -1, duration: 1.2 }, '<')
       .fromTo(content, { autoAlpha: 0 }, { autoAlpha: 1, stagger: { amount: 0.8, from: 'random' } }, '<');
   
