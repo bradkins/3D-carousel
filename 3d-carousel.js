@@ -89,13 +89,7 @@ function init3dImageCarousel() {
       inertia: true,
       allowNativeTouchScrolling: true,
       onPress() {
-        // Subtle feedback on touch/mousedown of the wrap
-        gsap.to(content, {
-          clipPath: 'inset(0%)',
-          duration: 0.3,
-          ease: 'power4.out',
-          overwrite: 'auto'
-        });
+        
         // Stop automatic spinning to prepare for drag
         gsap.killTweensOf(spin);
         spin.timeScale(0);
@@ -113,12 +107,6 @@ function init3dImageCarousel() {
         if (!this.tween || !this.tween.isActive()) {
           gsap.to(spin, { timeScale: 1, duration: 0.1 });
         }
-        gsap.to(content, {
-          clipPath: 'inset(0%)',
-          duration: 0.5,
-          ease: 'power4.out',
-          overwrite: 'auto'
-        });
       },
       onThrowComplete() {
         gsap.to(spin, { timeScale: 1, duration: 0.1 });
