@@ -14,7 +14,7 @@ function init3dImageCarousel() {
 
   // Define the radius of your cylinder here
   const calcRadius = () => {
-    radius = window.innerWidth * 0.7;
+    radius = window.innerWidth * 0.6;
   };
 
   // Destroy function to reset everything on resize
