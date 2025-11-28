@@ -9,13 +9,13 @@ function init3dImageCarousel() {
   let intro;
   let lastWidth = window.innerWidth;
 
-  const wrap = document.querySelector('[data-3d-carousel-wrap]');
+  const wrap = document.querySelector("[data-3d-carousel-wrap]");
   if (!wrap) return;
 
   // Define the radius of your cylinder here
   const calcRadius = () => {
     radius = window.innerWidth * 0.7;
-  }
+  };
 
   // Destroy function to reset everything on resize
   const destroy = () => {
@@ -24,33 +24,31 @@ function init3dImageCarousel() {
     spin && spin.kill();
     tilt && tilt.kill();
     intro && intro.kill();
-    ScrollTrigger.getAll().forEach(st => st.kill());
-    const panels = wrap.querySelectorAll('[data-3d-carousel-panel]');
-    gsap.set(panels, { clearProps: 'transform' });
-    gsap.set(wrap, { clearProps: 'all' });
+    ScrollTrigger.getAll().forEach((st) => st.kill());
+    const panels = wrap.querySelectorAll("[data-3d-carousel-panel]");
+    gsap.set(panels, { clearProps: "transform" });
+    gsap.set(wrap, { clearProps: "all" });
   };
 
   // Create function that sets the spin, drag, and rotation
   const create = () => {
     calcRadius();
 
-    const panels = wrap.querySelectorAll('[data-3d-carousel-panel]');
-    const content = wrap.querySelectorAll('[data-3d-carousel-content]');
-    const proxy = document.createElement('div');
+    const panels = wrap.querySelectorAll("[data-3d-carousel-panel]");
+    const content = wrap.querySelectorAll("[data-3d-carousel-content]");
+    const proxy = document.createElement("div");
     const wrapProgress = gsap.utils.wrap(0, 1);
     const dragDistance = window.innerWidth * 3; // Control the snapiness on drag
     let startProg;
 
     // Position panels in 3D space
-    panels.forEach(p =>
-      p.style.transformOrigin = `50% 50% ${-radius}px`
-    );
+    panels.forEach((p) => (p.style.transformOrigin = `50% 50% ${-radius}px`));
 
     // Infinite rotation of all panels
     spin = gsap.fromTo(
       panels,
-      { rotationY: i => (i * 360) / panels.length },
-      { rotationY: '-=360', duration: 120, ease: 'none', repeat: -1 }
+      { rotationY: (i) => (i * 360) / panels.length },
+      { rotationY: "-=360", duration: 120, ease: "none", repeat: -1 }
     );
 
     // cheeky workaround to create some 'buffer' when scrolling back up
@@ -62,22 +60,22 @@ function init3dImageCarousel() {
 
     gsap.ticker.add(() => {
       const now = Date.now();
-      
+
       // Only update blur every 50ms instead of every frame
       if (now - lastBlurUpdate > blurUpdateInterval) {
         lastBlurUpdate = now;
-        
+
         panels.forEach((panel, i) => {
-          const rotation = gsap.getProperty(panel, 'rotationY');
+          const rotation = gsap.getProperty(panel, "rotationY");
           const normalizedRotation = ((rotation % 360) + 360) % 360;
-          
+
           let blurAmount = 0;
           if (normalizedRotation > 45 && normalizedRotation < 315) {
             const distanceFrom180 = Math.abs(180 - normalizedRotation);
-            blurAmount = (1 - (distanceFrom180 / 135)) * 30;
+            blurAmount = (1 - distanceFrom180 / 135) * 30;
           }
-          
-          const img = panel.querySelector('.img-carousel__img');
+
+          const img = panel.querySelector(".img-carousel__img");
           if (img) {
             img.style.filter = `blur(${blurAmount}px)`;
           }
@@ -87,11 +85,10 @@ function init3dImageCarousel() {
 
     draggableInstance = Draggable.create(proxy, {
       trigger: wrap,
-      type: 'x',
+      type: "x",
       inertia: true,
       allowNativeTouchScrolling: true,
       onPress() {
-       
         // Stop automatic spinning to prepare for drag
         gsap.killTweensOf(spin);
         spin.timeScale(0);
@@ -109,7 +106,6 @@ function init3dImageCarousel() {
         if (!this.tween || !this.tween.isActive()) {
           gsap.to(spin, { timeScale: 1, duration: 0.1 });
         }
-        
       },
       onThrowComplete() {
         gsap.to(spin, { timeScale: 1, duration: 0.1 });
@@ -120,20 +116,21 @@ function init3dImageCarousel() {
     intro = gsap.timeline({
       scrollTrigger: {
         trigger: wrap,
-        start: 'top 80%',
-        end: 'bottom top',
+        start: "top 80%",
+        end: "bottom top",
         scrub: false,
-        toggleActions: 'play resume play play'
+        toggleActions: "play resume play play"
       },
-      defaults: { ease: 'expo.inOut' },
+      defaults: { ease: "expo.inOut" },
       onComplete: () => {
         // Start tilt animation after intro completes
-        tilt = gsap.fromTo(wrap,
+        tilt = gsap.fromTo(
+          wrap,
           { rotation: -1 },
           {
             rotation: 1,
             duration: 8,
-            ease: 'sine.inOut',
+            ease: "sine.inOut",
             repeat: -1,
             yoyo: true
           }
@@ -143,14 +140,24 @@ function init3dImageCarousel() {
 
     intro
       .fromTo(spin, { timeScale: 18 }, { timeScale: 1, duration: 2 })
-      .fromTo(wrap, { scale: 0.5, rotation: 2 }, { scale: 1, rotation: -1, duration: 1.2 }, '<')
-      .fromTo(content, { autoAlpha: 0 }, { autoAlpha: 1, stagger: { amount: 0.8, from: 'random' } }, '<');
+      .fromTo(
+        wrap,
+        { scale: 0.5, rotation: 2 },
+        { scale: 1, rotation: -1, duration: 1.2 },
+        "<"
+      )
+      .fromTo(
+        content,
+        { autoAlpha: 0 },
+        { autoAlpha: 1, stagger: { amount: 0.8, from: "random" } },
+        "<"
+      );
 
     // While-scrolling feedback
     observerInstance = Observer.create({
       target: window,
-      type: 'wheel,scroll,touch',
-      onChangeY: self => {
+      type: "wheel,scroll,touch",
+      onChangeY: (self) => {
         // Control how much scroll speed affects the rotation on scroll
         let v = gsap.utils.clamp(-60, 60, self.velocityY * 0.005);
         spin.timeScale(v);
@@ -183,15 +190,18 @@ function init3dImageCarousel() {
   };
 
   // Whenever window resizes, first destroy, then re-init it all
-  window.addEventListener('resize', debounce(() => {
-    const newWidth = window.innerWidth;
-    if (newWidth !== lastWidth) {
-      lastWidth = newWidth;
-      destroy();
-      create();
-      ScrollTrigger.refresh();
-    }
-  }, 200));
+  window.addEventListener(
+    "resize",
+    debounce(() => {
+      const newWidth = window.innerWidth;
+      if (newWidth !== lastWidth) {
+        lastWidth = newWidth;
+        destroy();
+        create();
+        ScrollTrigger.refresh();
+      }
+    }, 200)
+  );
 }
 
 // Initialize 3D Image Carousel
