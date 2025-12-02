@@ -38,7 +38,7 @@ function init3dImageCarousel() {
     const content = wrap.querySelectorAll("[data-3d-carousel-content]");
     const proxy = document.createElement("div");
     const wrapProgress = gsap.utils.wrap(0, 1);
-    const dragDistance = window.innerWidth * 3; // Control the snapiness on drag
+    const dragDistance = window.innerWidth * 3;
     let startProg;
 
     // Position panels in 3D space
@@ -56,12 +56,11 @@ function init3dImageCarousel() {
 
     // Add blur effect with throttling for better performance
     let lastBlurUpdate = 0;
-    const blurUpdateInterval = 50; // Update blur every 50ms instead of every frame
+    const blurUpdateInterval = 50;
 
     gsap.ticker.add(() => {
       const now = Date.now();
 
-      // Only update blur every 50ms instead of every frame
       if (now - lastBlurUpdate > blurUpdateInterval) {
         lastBlurUpdate = now;
 
@@ -70,15 +69,16 @@ function init3dImageCarousel() {
           const normalizedRotation = ((rotation % 360) + 360) % 360;
 
           let blurAmount = 0;
-          if (normalizedRotation > 45 && normalizedRotation < 315) {
+          if (normalizedRotation > 80 && normalizedRotation < 315) {
             const distanceFrom180 = Math.abs(180 - normalizedRotation);
             blurAmount = (1 - distanceFrom180 / 135) * 30;
           }
 
-          const img = panel.querySelector(".img-carousel__img");
-          if (img) {
-            img.style.filter = `blur(${blurAmount}px)`;
-          }
+          // Apply blur to each individual screen
+          const screens = panel.querySelectorAll(".img-carousel__screen");
+          screens.forEach(screen => {
+            screen.style.filter = `blur(${blurAmount}px)`;
+          });
         });
       }
     });
@@ -89,7 +89,6 @@ function init3dImageCarousel() {
       inertia: true,
       allowNativeTouchScrolling: true,
       onPress() {
-        // Stop automatic spinning to prepare for drag
         gsap.killTweensOf(spin);
         spin.timeScale(0);
         startProg = spin.progress();
@@ -123,7 +122,6 @@ function init3dImageCarousel() {
       },
       defaults: { ease: "expo.inOut" },
       onComplete: () => {
-        // Start tilt animation after intro completes
         tilt = gsap.fromTo(
           wrap,
           { rotation: -1 },
@@ -158,7 +156,6 @@ function init3dImageCarousel() {
       target: window,
       type: "wheel,scroll,touch",
       onChangeY: (self) => {
-        // Control how much scroll speed affects the rotation on scroll
         let v = gsap.utils.clamp(-60, 60, self.velocityY * 0.005);
         spin.timeScale(v);
         const resting = v < 0 ? -1 : 1;
@@ -177,10 +174,8 @@ function init3dImageCarousel() {
     });
   };
 
-  // First create on function call
   create();
 
-  // Debounce function to use on resize events
   const debounce = (fn, ms) => {
     let t;
     return () => {
@@ -189,7 +184,6 @@ function init3dImageCarousel() {
     };
   };
 
-  // Whenever window resizes, first destroy, then re-init it all
   window.addEventListener(
     "resize",
     debounce(() => {
@@ -204,7 +198,6 @@ function init3dImageCarousel() {
   );
 }
 
-// Initialize 3D Image Carousel
 document.addEventListener("DOMContentLoaded", () => {
   init3dImageCarousel();
 });
