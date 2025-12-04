@@ -40,6 +40,8 @@ function init3dImageCarousel() {
     const wrapProgress = gsap.utils.wrap(0, 1);
     const dragDistance = window.innerWidth * 3;
     let startProg;
+    let dragVelocity = 0;
+    let isDragging = false;
 
     // Position panels in 3D space
     panels.forEach((p) => (p.style.transformOrigin = `50% 50% ${-radius}px`));
@@ -89,6 +91,7 @@ function init3dImageCarousel() {
       inertia: true,
       allowNativeTouchScrolling: true,
       onPress() {
+        isDragging = true;
         gsap.killTweensOf(spin);
         spin.timeScale(0);
         startProg = spin.progress();
@@ -96,6 +99,8 @@ function init3dImageCarousel() {
       onDrag() {
         const p = startProg + (this.startX - this.x) / dragDistance;
         spin.progress(wrapProgress(p));
+        // Track velocity during drag
+        dragVelocity = (this.startX - this.x) / dragDistance;
       },
       onThrowUpdate() {
         const p = startProg + (this.startX - this.x) / dragDistance;
@@ -103,11 +108,27 @@ function init3dImageCarousel() {
       },
       onRelease() {
         if (!this.tween || !this.tween.isActive()) {
+          // Simple case - no inertia, just resume
           gsap.to(spin, { timeScale: 1, duration: 0.1 });
         }
       },
       onThrowComplete() {
-        gsap.to(spin, { timeScale: 1, duration: 0.1 });
+        isDragging = false;
+        // Calculate direction based on drag velocity
+        const direction = dragVelocity > 0 ? 1 : -1;
+        const speed = Math.abs(dragVelocity) * 20;
+        const clampedSpeed = gsap.utils.clamp(1, 5, speed);
+        
+        // Animate with directional momentum
+        gsap.fromTo(
+          spin,
+          { timeScale: direction * clampedSpeed },
+          {
+            timeScale: direction,
+            duration: 1.2,
+            ease: "power2.out"
+          }
+        );
       }
     })[0];
 
@@ -151,11 +172,14 @@ function init3dImageCarousel() {
         "<"
       );
 
-    // While-scrolling feedback
+    // While-scrolling feedback - but not when dragging
     observerInstance = Observer.create({
       target: window,
       type: "wheel,scroll,touch",
       onChangeY: (self) => {
+        // Skip if currently dragging
+        if (isDragging) return;
+        
         let v = gsap.utils.clamp(-60, 60, self.velocityY * 0.005);
         spin.timeScale(v);
         const resting = v < 0 ? -1 : 1;
