@@ -158,7 +158,7 @@ function init3dImageCarousel() {
     });
 
     intro
-      .fromTo(spin, { timeScale: 25 }, { timeScale: 1, duration: 2 })
+      .fromTo(spin, { timeScale: 26 }, { timeScale: 1, duration: 2 })
       .fromTo(
         wrap,
         { scale: 0.5, rotation: 2 },
